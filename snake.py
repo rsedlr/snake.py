@@ -10,6 +10,7 @@ class Game:
       clock = pygame.time.Clock()
       snake = Snake(self.display)
       apple = Apple(self.display)
+      self.score = 0
       x_change = 0
       y_change = 0
       bumper_x = Config['game']['width'] - Config['game']['bumper_size']
@@ -35,7 +36,7 @@ class Game:
                   x_change = 0
                   y_change = Config['snake']['speed']
         
-         self.display.fill(Config['colors']['green'])
+         self.display.fill(Config['colors']['grey'])
          pygame.draw.rect(
             self.display, 
             Config['colors']['black'], [
@@ -49,32 +50,49 @@ class Game:
          snake.move(x_change, y_change)
          score = font.render('Score: {}'.format(self.score), True, Config['colors']['white'])
          score_rect = score.get_rect(
-            center=(Config['game']['width']/2, 
-                    Config['game']['height'] - Config['game']['bumper_size'] / 2)
+            center=(Config['game']['width'] + 30, 40)
          )
          self.display.blit(score, score_rect)
          snake_rect = snake.draw()
 
-         if (snake.x_pos < 30 or snake.y_pos < 30 or 
+         if (snake.x_pos < Config['game']['bumper_size'] or snake.y_pos < Config['game']['bumper_size'] or 
                snake.x_pos + Config['snake']['width'] > bumper_x or 
                snake.y_pos + Config['snake']['height'] > bumper_y ):
-            self.score = 0
             self.loop()
+
+         if len(snake.body) >= 1:
+               for cell in snake.body:
+                  if snake.x_pos == cell[0] and snake.y_pos == cell[1]:
+                     self.loop()
 
          if apple_rect.colliderect(snake_rect):
             apple.randomize()
             self.score += 1
+            snake.eat()
 
          pygame.display.update()
          clock.tick(Config['game']['fps'])
 
 class Snake:
    def __init__(self, display):
-      self.x_pos = Config['game']['width'] / 2
-      self.y_pos = Config['game']['height'] / 2
+      self.x_pos = (Config['game']['width']) / 2
+      self.y_pos = (Config['game']['height']) / 2
       self.display = display
+      self.body = []
+      self.max_size = 0
 
    def draw(self):
+      for item in self.body:
+         pygame.draw.rect(
+               self.display, 
+               Config['colors']['green'],
+               [
+                  item[0],
+                  item[1],
+                  Config['snake']['width'],
+                  Config['snake']['height']
+               ]
+         )
       return pygame.draw.rect(
          self.display, 
          Config['colors']['green'],
@@ -85,10 +103,17 @@ class Snake:
             Config['snake']['width']
          ]
       )
+   
+   def eat(self):
+      self.max_size += 1
 
    def move(self, x_change, y_change):
+      self.body.append((self.x_pos, self.y_pos))
       self.x_pos += x_change
       self.y_pos += y_change
+
+      if len(self.body) > self.max_size:
+         del(self.body[0])
 
 
 class Apple:
@@ -104,8 +129,8 @@ class Apple:
       bumper = Config['game']['bumper_size']
       max_x = (width - bumper - Config['snake']['width'])
       max_y = (height - bumper - Config['snake']['height']) 
-      self.x_pos = random.randint(bumper, max_x)
-      self.y_pos = random.randint(bumper, max_y)
+      self.x_pos = round(random.randint(bumper, max_x) / 20) * 20
+      self.y_pos = round(random.randint(bumper, max_y) / 20) * 20
          
    def draw(self):
       return pygame.draw.rect(
@@ -121,8 +146,8 @@ class Apple:
 
 def main():
    display = pygame.display.set_mode(
-      (Config['game']['width'], 
-       Config['game']['width'])
+      (Config['window']['width'], 
+       Config['game']['height'])
    )
    pygame.display.set_caption(Config['game']['caption'])
    game = Game(display)

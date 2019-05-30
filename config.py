@@ -1,9 +1,12 @@
 Config = {
+    'window': {
+        'width': 1000
+    },
     'game': {
         'caption': 'Snake.py',
-        'height': 550,
-        'width': 550,
-        'fps': 15,  # 30
+        'height': 600,
+        'width': 600,
+        'fps': 15,  # 15
         'bumper_size': 20
     },
     'snake': {
@@ -19,6 +22,7 @@ Config = {
         'white': (255, 255, 255),
         'black': (0, 0, 0),
         'green': (0, 200, 0),
-        'red': (200, 0, 0)
+        'red': (200, 0, 0),
+        'grey': (60,65,65)
     }
 }
